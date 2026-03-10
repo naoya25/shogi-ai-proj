@@ -1,6 +1,8 @@
 import sys
-import random
+
 import cshogi
+
+from ai.think import think
 
 
 def main():
@@ -37,7 +39,7 @@ def main():
             if len(moves) == 0:
                 print("bestmove resign")
             else:
-                move = random.choice(moves)
+                move = think(board)
                 print("bestmove", cshogi.move_to_usi(move))
 
             sys.stdout.flush()

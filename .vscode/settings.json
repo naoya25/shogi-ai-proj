@@ -4,6 +4,7 @@
         "cshogi",
         "isready",
         "minmax",
+        "negamax",
         "readyok",
         "shogi",
         "usiok",

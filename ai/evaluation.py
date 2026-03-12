@@ -1,6 +1,6 @@
 import cshogi
 
-MATE_SCORE = 100000
+MATE_SCORE = 10000000
 
 
 PIECE_VALUE = {
@@ -58,3 +58,15 @@ def evaluate(board):
         score -= hand_white[hp] * value
 
     return score
+
+
+def evaluate_negamax(board):
+    """
+    手番側が+、相手が-
+    """
+    score = evaluate(board)
+
+    if board.turn == cshogi.BLACK:
+        return score
+    else:
+        return -score

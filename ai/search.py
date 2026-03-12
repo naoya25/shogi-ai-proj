@@ -1,8 +1,8 @@
 import random
 
-from algorithm.search.minmax import minimax
+from algorithm.search.negamax import negamax
 
-from .evaluation import evaluate
+from .evaluation import evaluate_negamax
 
 
 def search(board, depth):
@@ -11,7 +11,7 @@ def search(board, depth):
     depthまで探索し、minmax法で最善手を探索(DFS)
     """
 
-    best_score, best_moves = minimax(board, depth, evaluate)
+    best_score, best_moves = negamax(board, 0, depth, evaluate_negamax)
 
     print(f"info score cp {best_score}")
     return random.choice(best_moves)

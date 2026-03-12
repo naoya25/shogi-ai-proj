@@ -1,4 +1,8 @@
+
 def negamax(board, depth, max_depth, evaluate):
+    """
+    評価値は、手番側が+、相手が-に統一
+    """
     if depth == max_depth or board.is_game_over():
         return evaluate(board), []
 

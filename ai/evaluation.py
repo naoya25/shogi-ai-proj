@@ -1,5 +1,8 @@
 import cshogi
 
+MATE_SCORE = 100000
+
+
 PIECE_VALUE = {
     cshogi.PAWN: 100,
     cshogi.LANCE: 300,
@@ -22,6 +25,13 @@ def evaluate(board):
     先手: +, 後手: -
     駒得を計算するのみ
     """
+    # 詰み判定
+    if board.is_game_over():
+        if board.turn == cshogi.BLACK:
+            return -MATE_SCORE
+        else:
+            return MATE_SCORE
+
     score = 0
 
     # 持ち駒

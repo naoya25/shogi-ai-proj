@@ -3,8 +3,10 @@
         "bestmove",
         "cshogi",
         "isready",
+        "minmax",
         "readyok",
         "shogi",
-        "usiok"
+        "usiok",
+        "zobrist"
     ]
 }

@@ -1,78 +1,103 @@
-def minimax_stack(board, max_depth, evaluate):
+def minimax(board, max_depth, evaluate):
 
     stack = [
         {
-            "board": board.copy(),
             "depth": 0,
             "maximizing": not board.turn,
-            "state": False,
+            "moves": list(board.legal_moves),
+            "index": 0,  # 次に探索する子ノードのインデックス
+            "value": -float("inf")
+            if not board.turn
+            else float("inf"),  # 現局面の評価値
+            "best_moves": [],  # 現局面の最善手
         }
     ]
 
     values = {}
-    best_moves = {}
 
     while stack:
-        node = stack.pop()
-
-        b = node["board"]
-        d = node["depth"]
+        node = stack[-1]
+        depth = node["depth"]
         maximizing = node["maximizing"]
-        state = node["state"]
 
-        key = b.zobrist_hash()
+        key = board.zobrist_hash()
 
-        if not state:
-            if d == max_depth or b.is_game_over():
-                values[key] = evaluate(b)
-                continue
+        # 終端ノード
+        if depth == max_depth or board.is_game_over():
+            val = evaluate(board)
+            values[key] = val
+
+            stack.pop()
+
+            if stack:
+                board.pop()
+
+                parent = stack[-1]
+
+                # 親ノードの評価値、最善手を更新
+                if parent["maximizing"]:
+                    if val > parent["value"]:
+                        parent["value"] = val
+                        parent["best_moves"] = [parent["moves"][parent["index"] - 1]]
+                    elif val == parent["value"]:
+                        parent["best_moves"].append(
+                            parent["moves"][parent["index"] - 1]
+                        )
+
+                else:
+                    if val < parent["value"]:
+                        parent["value"] = val
+                        parent["best_moves"] = [parent["moves"][parent["index"] - 1]]
+                    elif val == parent["value"]:
+                        parent["best_moves"].append(
+                            parent["moves"][parent["index"] - 1]
+                        )
+
+            continue
+
+        # 子ノードが残っている場合
+        if node["index"] < len(node["moves"]):
+            move = node["moves"][node["index"]]
+            node["index"] += 1
+
+            board.push(move)
 
             stack.append(
                 {
-                    "board": b,
-                    "depth": d,
-                    "maximizing": maximizing,
-                    "state": True,
+                    "depth": depth + 1,
+                    "maximizing": not maximizing,
+                    "moves": list(board.legal_moves),
+                    "index": 0,
+                    "value": -float("inf") if not maximizing else float("inf"),
+                    "best_moves": [],
                 }
             )
 
-            moves = list(b.legal_moves)
-
-            for move in moves:
-                child = b.copy()
-                child.push(move)
-
-                stack.append(
-                    {
-                        "board": child,
-                        "depth": d + 1,
-                        "maximizing": not maximizing,
-                        "state": False,
-                    }
-                )
-
+        # 子ノードの探索終了後
         else:
-            moves = list(b.legal_moves)
+            val = node["value"]
 
-            child_values = []
-            child_moves = []
+            stack.pop()
 
-            for move in moves:
-                child = b.copy()
-                child.push(move)
+            if stack:
+                board.pop()
 
-                child_values.append(values[child.zobrist_hash()])
-                child_moves.append(move)
+                parent = stack[-1]
 
-            if maximizing:
-                best_value = max(child_values)
-            else:
-                best_value = min(child_values)
+                move = parent["moves"][parent["index"] - 1]
 
-            best_indices = [i for i, v in enumerate(child_values) if v == best_value]
+                if parent["maximizing"]:
+                    if val > parent["value"]:
+                        parent["value"] = val
+                        parent["best_moves"] = [move]
+                    elif val == parent["value"]:
+                        parent["best_moves"].append(move)
 
-            values[key] = best_value
-            best_moves[key] = [child_moves[i] for i in best_indices]
+                else:
+                    if val < parent["value"]:
+                        parent["value"] = val
+                        parent["best_moves"] = [move]
+                    elif val == parent["value"]:
+                        parent["best_moves"].append(move)
 
-    root_hash = board.zobrist_hash()
-    return values[root_hash], best_moves.get(root_hash)
+    return node["value"], node["best_moves"]

@@ -5,7 +5,7 @@ def minimax_stack(board, max_depth, evaluate):
             "board": board.copy(),
             "depth": 0,
             "maximizing": not board.turn,
-            "state": 0,
+            "state": False,
         }
     ]
 
@@ -22,7 +22,7 @@ def minimax_stack(board, max_depth, evaluate):
 
         key = b.zobrist_hash()
 
-        if state == 0:
+        if not state:
             if d == max_depth or b.is_game_over():
                 values[key] = evaluate(b)
                 continue
@@ -32,7 +32,7 @@ def minimax_stack(board, max_depth, evaluate):
                     "board": b,
                     "depth": d,
                     "maximizing": maximizing,
-                    "state": 1,
+                    "state": True,
                 }
             )
 
@@ -47,7 +47,7 @@ def minimax_stack(board, max_depth, evaluate):
                         "board": child,
                         "depth": d + 1,
                         "maximizing": not maximizing,
-                        "state": 0,
+                        "state": False,
                     }
                 )
 

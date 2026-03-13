@@ -1,6 +1,8 @@
 def alpha_beta(board, depth, max_depth, alpha, beta, evaluate):
     """
-    評価値は、手番側が+、相手が-に統一
+    Negamax 形式の αβ探索。
+
+    `evaluate(board)` は「手番側が+、相手が-」の評価値を返す前提。
     """
     if depth == max_depth or board.is_game_over():
         return evaluate(board), []

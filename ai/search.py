@@ -12,12 +12,7 @@ def search(board):
     """
 
     best_score, best_moves = alpha_beta(
-        board,
-        0,
-        4,
-        -float("inf"),
-        float("inf"),
-        evaluate_negamax,
+        board, 0, 3, -float("inf"), float("inf"), evaluate_negamax
     )
 
     print(f"info score cp {best_score}")

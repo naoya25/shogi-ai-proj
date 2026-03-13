@@ -10,18 +10,30 @@ from datetime import datetime
 import cshogi
 from cshogi import KIF
 
-from ai.evaluation import evaluate_negamax
+from ai.evaluation import evaluate, evaluate_negamax
 from algorithm.search.alpha_beta import alpha_beta
+from algorithm.search.minimax import minimax
 
-DEPTH = 3
-N_GAMES = 10
-MAX_MOVES = 300
+N_GAMES = 10  # 対局数
+MAX_MOVES = 300  # 手数制限 超えたら引き分け
 
 random.seed(42)
 
+PLAYERS = [
+    (
+        "Minimax",
+        lambda board: minimax(board, 0, 3, not board.turn, evaluate),
+    ),
+    (
+        "AlphaBeta",
+        lambda board: alpha_beta(
+            board, 0, 3, -float("inf"), float("inf"), evaluate_negamax
+        ),
+    ),
+]
 
-# 実装方法は違うが、アルゴリズム的には同じことをしているので互角になるはず
-def test_minmax_vs_alpha_beta_play():
+
+def test_vs_play():
     wins = 0
     losses = 0
     draws = 0
@@ -42,14 +54,10 @@ def test_minmax_vs_alpha_beta_play():
             turn_count += 1
 
             if board.turn == first_player:
-                score, moves = alpha_beta(
-                    board, 0, 3, -float("inf"), float("inf"), evaluate_negamax
-                )
+                score, moves = PLAYERS[0][1](board)
                 move = random.choice(moves)
             else:
-                score, moves = alpha_beta(
-                    board, 0, 4, -float("inf"), float("inf"), evaluate_negamax
-                )
+                score, moves = PLAYERS[1][1](board)
                 move = random.choice(moves)
 
             board.push(move)
@@ -78,8 +86,8 @@ def test_minmax_vs_alpha_beta_play():
             result = "resign"
 
         print("games:", N_GAMES)
-        print("alpha_beta depth3 win:", wins)
-        print("alpha_beta depth4 win:", losses)
+        print(f"{PLAYERS[0][0]} win:", wins)
+        print(f"{PLAYERS[1][0]} win:", losses)
         print("draw:", draws)
         print("win rate:", wins / (wins + losses))
         elapsed_seconds = int(time.time() - start)
@@ -92,16 +100,16 @@ def test_minmax_vs_alpha_beta_play():
         kif_filename = f"kif/test_alphabeta_vs_alphabeta_{today_str}_{i}.kif"
         exporter = KIF.Exporter(kif_filename)
         exporter.header(
-            ["AlphaBeta depth3", "AlphaBeta depth4"]
+            [PLAYERS[0][0], PLAYERS[1][0]]
             if first_player == cshogi.BLACK
-            else ["AlphaBeta depth4", "AlphaBeta depth3"]
+            else [PLAYERS[1][0], PLAYERS[0][0]]
         )
         for move in moves_record:
             exporter.move(move)
         exporter.end(result)
 
-    print("games:", N_GAMES)
-    print("alpha_beta depth3 win:", wins)
-    print("alpha_beta depth4 win:", losses)
+    print("============= games:", N_GAMES, "=============")
+    print(f"{PLAYERS[0][0]} win:", wins)
+    print(f"{PLAYERS[1][0]} win:", losses)
     print("draw:", draws)
     print("win rate:", wins / (wins + losses))

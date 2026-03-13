@@ -10,9 +10,8 @@ from datetime import datetime
 import cshogi
 from cshogi import KIF
 
-from ai.evaluation import evaluate, evaluate_negamax
+from ai.evaluation import evaluate_negamax
 from algorithm.search.alpha_beta import alpha_beta
-from algorithm.search.minimax import minimax
 
 N_GAMES = 10  # 対局数
 MAX_MOVES = 300  # 手数制限 超えたら引き分け
@@ -21,13 +20,15 @@ random.seed(42)
 
 PLAYERS = [
     (
-        "Minimax",
-        lambda board: minimax(board, 0, 3, not board.turn, evaluate),
-    ),
-    (
-        "AlphaBeta",
+        "AlphaBeta depth 3",
         lambda board: alpha_beta(
             board, 0, 3, -float("inf"), float("inf"), evaluate_negamax
+        ),
+    ),
+    (
+        "AlphaBeta depth 4",
+        lambda board: alpha_beta(
+            board, 0, 4, -float("inf"), float("inf"), evaluate_negamax
         ),
     ),
 ]
@@ -54,11 +55,9 @@ def test_vs_play():
             turn_count += 1
 
             if board.turn == first_player:
-                score, moves = PLAYERS[0][1](board)
-                move = random.choice(moves)
+                score, move = PLAYERS[0][1](board)
             else:
                 score, move = PLAYERS[1][1](board)
-                # move = random.choice(moves)
 
             board.push(move)
             moves_record.append(move)

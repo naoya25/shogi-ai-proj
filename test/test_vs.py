@@ -94,7 +94,7 @@ def test_vs_play():
         seconds = elapsed_seconds % 60
         print(f"turn: {turn_count}, time: {hours:02d}:{minutes:02d}:{seconds:02d}")
 
-        today_str = datetime.now().strftime("%Y%m%d")
+        today_str = datetime.now().strftime("%Y%m%d_%H%M")
         kif_filename = f"kif/test_{today_str}_{i}.kif"
         exporter = KIF.Exporter(kif_filename)
         exporter.header(

@@ -93,7 +93,7 @@ def test_vs_play():
         hours = elapsed_seconds // 3600
         minutes = (elapsed_seconds % 3600) // 60
         seconds = elapsed_seconds % 60
-        print(f"time: {hours:02d}:{minutes:02d}:{seconds:02d}")
+        print(f"turn: {turn_count}, time: {hours:02d}:{minutes:02d}:{seconds:02d}")
 
         today_str = datetime.now().strftime("%Y%m%d")
         kif_filename = f"kif/test_alphabeta_vs_alphabeta_{today_str}_{i}.kif"

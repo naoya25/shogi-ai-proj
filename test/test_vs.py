@@ -57,8 +57,8 @@ def test_vs_play():
                 score, moves = PLAYERS[0][1](board)
                 move = random.choice(moves)
             else:
-                score, moves = PLAYERS[1][1](board)
-                move = random.choice(moves)
+                score, move = PLAYERS[1][1](board)
+                # move = random.choice(moves)
 
             board.push(move)
             moves_record.append(move)

@@ -9,6 +9,7 @@
         "readyok",
         "SFEN",
         "shogi",
+        "Stockfish",
         "usiok",
         "zobrist"
     ]

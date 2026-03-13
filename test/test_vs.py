@@ -12,24 +12,23 @@ from cshogi import KIF
 
 from ai.evaluation import evaluate_negamax
 from algorithm.search.alpha_beta import alpha_beta
+from algorithm.search.root_search import root_search
 
-N_GAMES = 10  # 対局数
+N_GAMES = 1  # 対局数
 MAX_MOVES = 300  # 手数制限 超えたら引き分け
 
 random.seed(42)
 
 PLAYERS = [
     (
-        "AlphaBeta depth 3",
+        "AlphaBeta",
         lambda board: alpha_beta(
             board, 0, 3, -float("inf"), float("inf"), evaluate_negamax
         ),
     ),
     (
-        "AlphaBeta depth 4",
-        lambda board: alpha_beta(
-            board, 0, 4, -float("inf"), float("inf"), evaluate_negamax
-        ),
+        "RootSearch",
+        lambda board: root_search(board, 3, evaluate_negamax),
     ),
 ]
 
@@ -40,7 +39,7 @@ def test_vs_play():
     draws = 0
 
     for i in range(N_GAMES):
-        print(f"================= game {i + 1} of {N_GAMES} =================\n")
+        print(f"\n================= game {i + 1} of {N_GAMES} =================\n")
 
         board = cshogi.Board()
         moves_record = []
@@ -96,7 +95,7 @@ def test_vs_play():
         print(f"turn: {turn_count}, time: {hours:02d}:{minutes:02d}:{seconds:02d}")
 
         today_str = datetime.now().strftime("%Y%m%d")
-        kif_filename = f"kif/test_alphabeta_vs_alphabeta_{today_str}_{i}.kif"
+        kif_filename = f"kif/test_{today_str}_{i}.kif"
         exporter = KIF.Exporter(kif_filename)
         exporter.header(
             [PLAYERS[0][0], PLAYERS[1][0]]

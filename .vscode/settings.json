@@ -11,6 +11,7 @@
         "readyok",
         "SFEN",
         "shogi",
+        "softmax",
         "Stockfish",
         "usiok",
         "zobrist"

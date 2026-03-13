@@ -1,7 +1,6 @@
 import cshogi
 
-MATE_SCORE = 10000000
-
+from utils.const import MATE_SCORE
 
 PIECE_VALUE = {
     cshogi.PAWN: 100,

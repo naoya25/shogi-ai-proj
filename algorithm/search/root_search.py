@@ -2,6 +2,7 @@ import math
 import random
 
 from algorithm.search.alpha_beta import alpha_beta
+from utils.const import MATE_SCORE
 
 
 def root_search(board, depth, evaluate):
@@ -23,24 +24,25 @@ def root_search(board, depth, evaluate):
 
 
 def select_move_with_softmax(moves_score, top_n=5, temperature=1.0):
+    # まず詰み手があればそれを確定
+    for move, score in moves_score:
+        if abs(score) >= MATE_SCORE:
+            return score, move  # 確定
+
     # 上位top_n手を選択
     moves_score.sort(key=lambda x: x[1], reverse=True)
     top_moves = moves_score[:top_n]
 
-    # スコアを取り出して正規化
+    # スコアを正規化
     scores = [s / 100 for _, s in top_moves]
 
-    # softmax計算
-    exp_scores = [math.exp(s / temperature) for s in scores]
+    # 最大値を引いて安定化
+    max_score = max(scores)
+    exp_scores = [math.exp((s - max_score) / temperature) for s in scores]
     total = sum(exp_scores)
     probs = [e / total for e in exp_scores]
-    # print(f"scores: {scores[:5]}")
-    # print(f"probs: {probs}")
 
     # 確率に従って1手選択
-    moves = [m for m, _ in top_moves]
-    chosen_move = random.choices(moves, weights=probs, k=1)[0]
-
     chosen_index = random.choices(range(len(top_moves)), weights=probs, k=1)[0]
     chosen_move, chosen_score = top_moves[chosen_index]
 

@@ -4,6 +4,7 @@
         "bestmove",
         "cshogi",
         "deeplearning",
+        "elif",
         "isready",
         "minmax",
         "negamax",
@@ -14,6 +15,8 @@
         "softmax",
         "Stockfish",
         "usiok",
+        "xlabel",
+        "ylabel",
         "zobrist"
     ]
 }

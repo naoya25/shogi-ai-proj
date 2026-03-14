@@ -11,23 +11,20 @@ import cshogi
 from cshogi import KIF
 
 from ai.evaluation import evaluate_negamax
-from algorithm.search.alpha_beta import alpha_beta
 from algorithm.search.root_search import root_search
 
-N_GAMES = 1  # 対局数
+N_GAMES = 1000  # 対局数
 MAX_MOVES = 300  # 手数制限 超えたら引き分け
 
 random.seed(42)
 
 PLAYERS = [
     (
-        "AlphaBeta",
-        lambda board: alpha_beta(
-            board, 0, 3, -float("inf"), float("inf"), evaluate_negamax
-        ),
+        "RootSearch A",
+        lambda board: root_search(board, 3, evaluate_negamax),
     ),
     (
-        "RootSearch",
+        "RootSearch B",
         lambda board: root_search(board, 3, evaluate_negamax),
     ),
 ]
@@ -54,9 +51,9 @@ def test_vs_play():
             turn_count += 1
 
             if board.turn == first_player:
-                score, move = PLAYERS[0][1](board)
+                _, move = PLAYERS[0][1](board)
             else:
-                score, move = PLAYERS[1][1](board)
+                _, move = PLAYERS[1][1](board)
 
             board.push(move)
             moves_record.append(move)
@@ -94,9 +91,17 @@ def test_vs_play():
         seconds = elapsed_seconds % 60
         print(f"turn: {turn_count}, time: {hours:02d}:{minutes:02d}:{seconds:02d}")
 
-        today_str = datetime.now().strftime("%Y%m%d_%H%M")
-        kif_filename = f"kif/test_{today_str}_{i}.kif"
-        exporter = KIF.Exporter(kif_filename)
+        # KIF保存
+        today_str = datetime.now().strftime("%Y%m%d_%H%M%S")
+        kif_path = Path("kif")
+        kif_path.mkdir(exist_ok=True)
+
+        filename = kif_path / f"test_{today_str}_{i}.kif"
+
+        # Exporter 生成
+        exporter = KIF.Exporter(str(filename))
+
+        # ヘッダー出力
         exporter.header(
             [PLAYERS[0][0], PLAYERS[1][0]]
             if first_player == cshogi.BLACK
@@ -105,6 +110,7 @@ def test_vs_play():
         for move in moves_record:
             exporter.move(move)
         exporter.end(result)
+        exporter.close()
 
     print("============= games:", N_GAMES, "=============")
     print(f"{PLAYERS[0][0]} win:", wins)

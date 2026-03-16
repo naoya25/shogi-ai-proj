@@ -1,11 +1,14 @@
 {
     "cSpell.words": [
         "alphabeta",
+        "backpropagate",
+        "Backpropagation",
         "bestmove",
         "cshogi",
         "deeplearning",
         "elif",
         "isready",
+        "mcts",
         "minmax",
         "negamax",
         "NNUE",

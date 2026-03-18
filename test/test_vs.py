@@ -2,15 +2,17 @@ import sys
 from pathlib import Path
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
-
 import random
 import time
 from datetime import datetime
 
 import cshogi
+import torch
 from cshogi import KIF
 
 from ai.evaluation import evaluate_negamax
+from algorithm.dl.mcts import mcts
+from algorithm.dl.net import ShogiNet
 from algorithm.search.root_search import root_search
 
 N_GAMES = 1000  # 対局数
@@ -18,14 +20,18 @@ MAX_MOVES = 300  # 手数制限 超えたら引き分け
 
 random.seed(42)
 
+net = ShogiNet()
+net.load_state_dict(torch.load("models/model_90.pt"))
+net.eval()
+
 PLAYERS = [
     (
-        "RootSearch A",
+        "AlphaBeta + 駒得",
         lambda board: root_search(board, 3, evaluate_negamax),
     ),
     (
-        "RootSearch B",
-        lambda board: root_search(board, 3, evaluate_negamax),
+        "MCTS",
+        lambda board: mcts(board, net),
     ),
 ]
 
@@ -53,7 +59,7 @@ def test_vs_play():
             if board.turn == first_player:
                 _, move = PLAYERS[0][1](board)
             else:
-                _, move = PLAYERS[1][1](board)
+                move, _ = PLAYERS[1][1](board)
 
             board.push(move)
             moves_record.append(move)

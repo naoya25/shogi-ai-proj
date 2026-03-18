@@ -12,6 +12,7 @@
         "minmax",
         "negamax",
         "NNUE",
+        "puct",
         "readyok",
         "SFEN",
         "shogi",

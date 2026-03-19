@@ -136,9 +136,8 @@ def train_network(net, dataset, epochs=5, batch_size=64):
 
 net = ShogiNet()
 
-memory = []
-
 for iteration in range(1000):
+    memory = []
     print("self play")
 
     for _ in range(10):

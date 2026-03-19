@@ -1,8 +1,8 @@
 import math
 
-import cshogi
 import torch
 
+from algorithm.dl.move_to_index import move_to_index
 from utils.board_to_tensor import board_to_tensor
 
 
@@ -32,55 +32,6 @@ def evaluate(board, net):
     return p[0], v.item()
 
 
-def move_to_index(move):
-    from_sq = cshogi.move_from(move)
-    to_sq = cshogi.move_to(move)
-
-    # --- 打ち駒 ---
-    if from_sq >= 81:
-        drop_type = from_sq - 81  # 0〜6
-
-        move_type = 20 + drop_type
-
-        idx = to_sq * 27 + move_type
-
-        assert 0 <= idx < 2187
-
-        return idx
-
-    # --- 通常手 ---
-    fx = from_sq % 9
-    fy = from_sq // 9
-
-    tx = to_sq % 9
-    ty = to_sq // 9
-
-    dx = tx - fx
-    dy = ty - fy
-
-    dx = max(-1, min(1, dx))
-    dy = max(-1, min(1, dy))
-
-    direction_map = {
-        (0, 1): 0,
-        (0, -1): 1,
-        (1, 0): 2,
-        (-1, 0): 3,
-        (1, 1): 4,
-        (-1, 1): 5,
-        (1, -1): 6,
-        (-1, -1): 7,
-    }
-
-    move_type = direction_map.get((dx, dy), 0)
-
-    idx = from_sq * 27 + move_type
-
-    assert 0 <= idx < 2187
-
-    return idx
-
-
 def expand(node, net):
     policy, value = evaluate(node.board, net)
 
@@ -90,7 +41,7 @@ def expand(node, net):
 
         child = Node(next_board, node, move)
 
-        move_id = move_to_index(move)
+        move_id = move_to_index(move, node.board.turn)
 
         child.policy = policy[move_id].item()
 

@@ -4,7 +4,9 @@ import numpy as np
 
 # cshogi.Board を学習用Tensorに変換
 def board_to_tensor(board):
-    planes = np.zeros((42, 9, 9), dtype=np.float32)
+    # 42ch: 盤面(14*2) + 持ち駒(7*2)
+    # +1ch: 手番 (BLACKなら1, WHITEなら0)
+    planes = np.zeros((43, 9, 9), dtype=np.float32)
 
     # --- 盤面 ---
     for sq in range(81):
@@ -39,5 +41,8 @@ def board_to_tensor(board):
 
         # WHITE
         planes[hand_offset + 7 + hp][:][:] = hand_white[hp]
+
+    # --- 手番 ---
+    planes[42][:][:] = 1.0 if board.turn == cshogi.BLACK else 0.0
 
     return planes

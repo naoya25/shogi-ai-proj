@@ -41,7 +41,7 @@ def self_play(net, simulations=200):
         total = sum(visit_counts.values())
 
         for m, v in visit_counts.items():
-            idx = move_to_index(m)
+            idx = move_to_index(m, board.turn)
             policy[idx] = v / total
 
         # state保存

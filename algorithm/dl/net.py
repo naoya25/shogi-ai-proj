@@ -7,7 +7,7 @@ class ShogiNet(nn.Module):
     def __init__(self):
         super().__init__()
 
-        self.conv1 = nn.Conv2d(42, 64, 3, padding=1)
+        self.conv1 = nn.Conv2d(43, 64, 3, padding=1)
         self.conv2 = nn.Conv2d(64, 64, 3, padding=1)
         self.conv3 = nn.Conv2d(64, 64, 3, padding=1)
 

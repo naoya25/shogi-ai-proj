@@ -1,5 +1,6 @@
 import math
 
+import numpy as np
 import torch
 
 from algorithm.dl.move_to_index import move_to_index
@@ -54,7 +55,7 @@ def puct(parent, child, c=1.4):
     if child.n == 0:
         Q = 0
     else:
-        Q = child.win / child.n
+        Q = -child.win / child.n  # child視点 → parent視点に変換
 
     U = c * child.policy * math.sqrt(parent.n) / (1 + child.n)
 
@@ -75,10 +76,30 @@ def backpropagate(node, value):
         node = node.parent
 
 
-def mcts(board, net, simulations=200):
+def mcts(
+    board,
+    net,
+    simulations=200,
+    add_dirichlet_noise=False,
+    dirichlet_alpha=0.3,
+    dirichlet_eps=0.25,
+    temperature=0.0,
+    sample_move=False,
+):
     root = Node(board)
 
     expand(root, net)
+
+    # ルートにDirichletノイズを付与（自己対局用）
+    if add_dirichlet_noise and root.children:
+        children = list(root.children.values())
+        priors = np.array([c.policy for c in children], dtype=np.float64)
+        if priors.sum() <= 0:
+            priors = np.ones_like(priors) / len(priors)
+        noise = np.random.dirichlet([dirichlet_alpha] * len(children))
+        mixed = (1.0 - dirichlet_eps) * priors + dirichlet_eps * noise
+        for c, p in zip(children, mixed):
+            c.policy = float(p)
 
     for _ in range(simulations):
         node = root
@@ -96,6 +117,17 @@ def mcts(board, net, simulations=200):
     # 訪問回数取得
     visit_counts = {child.move: child.n for child in root.children.values()}
 
-    best_child = max(root.children.values(), key=lambda c: c.n)
+    # 手の選択: 自己対局用には visit_counts に基づくサンプリングを使えるようにする
+    if sample_move and temperature > 0 and visit_counts:
+        moves = list(visit_counts.keys())
+        counts = np.array([visit_counts[m] for m in moves], dtype=np.float64)
+        if counts.sum() <= 0:
+            counts = np.ones_like(counts)
+        if temperature != 1.0:
+            counts = counts ** (1.0 / temperature)
+        probs = counts / counts.sum()
+        move = np.random.choice(moves, p=probs)
+    else:
+        move = max(root.children.values(), key=lambda c: c.n).move
 
-    return best_child.move, visit_counts
+    return move, visit_counts

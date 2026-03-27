@@ -8,15 +8,6 @@ from algorithm.dl.mcts import mcts, move_to_index
 from algorithm.dl.net import ShogiNet
 from utils.board_to_tensor import board_to_tensor
 
-net = ShogiNet()
-
-board = cshogi.Board()
-
-move, visit_counts = mcts(board, net, simulations=200)
-
-print(cshogi.move_to_usi(move))
-
-
 MAX_MOVES = 300
 
 
@@ -32,8 +23,17 @@ def self_play(net, simulations=200):
         if move_count >= MAX_MOVES:
             break
 
-        # MCTSで探索
-        move, visit_counts = mcts(board, net, simulations)
+        # MCTSで探索（自己対局ではノイズ + サンプリングを有効化）
+        move, visit_counts = mcts(
+            board,
+            net,
+            simulations=simulations,
+            add_dirichlet_noise=True,
+            dirichlet_alpha=0.3,
+            dirichlet_eps=0.25,
+            temperature=1.0,
+            sample_move=True,
+        )
 
         # policy教師作成
         policy = np.zeros(2187)
@@ -118,10 +118,8 @@ def compute_loss(pred_p, pred_v, target_p, target_v):
     return policy_loss + value_loss
 
 
-def train_network(net, dataset, epochs=5, batch_size=64):
+def train_network(net, dataset, optimizer, epochs=5, batch_size=64):
     loader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, shuffle=True)
-
-    optimizer = torch.optim.Adam(net.parameters(), lr=1e-3)
 
     for _ in range(epochs):
         for state, policy, value in loader:
@@ -135,6 +133,7 @@ def train_network(net, dataset, epochs=5, batch_size=64):
 
 
 net = ShogiNet()
+optimizer = torch.optim.Adam(net.parameters(), lr=1e-3)
 
 for iteration in range(1000):
     memory = []
@@ -148,7 +147,7 @@ for iteration in range(1000):
 
     print("training")
 
-    train_network(net, dataset)
+    train_network(net, dataset, optimizer)
 
     # モデル保存
     torch.save(net.state_dict(), f"models/model_{iteration}.pt")
